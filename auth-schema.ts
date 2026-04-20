@@ -10,7 +10,7 @@ export const user = pgTable("user", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
-    .$onUpdate(() => new Date())
+    .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
   role: text("role"),
   banned: boolean("banned").default(false),
@@ -26,7 +26,7 @@ export const session = pgTable(
     token: text("token").notNull().unique(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
-      .$onUpdate(() => new Date())
+      .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
@@ -56,7 +56,7 @@ export const account = pgTable(
     password: text("password"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
-      .$onUpdate(() => new Date())
+      .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
   (table) => [index("account_userId_idx").on(table.userId)],
@@ -72,41 +72,15 @@ export const verification = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
-      .$onUpdate(() => new Date())
+      .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
-export const weatherReports = pgTable("weather_reports", {
-  id: text("id").primaryKey(),
-  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-  reportType: text("report_type").notNull(), // MET REPORT / SPECIAL
-  reportTime: text("report_time").notNull(), // ISO string or datetime
-  windDirection: text("wind_direction"),
-  windSpeed: text("wind_speed"),
-  visibilityValue: text("visibility_value"),
-  visibilityUnit: text("visibility_unit"), // m or km
-  presentWeatherJSON: text("present_weather_json"), // stringified JSON
-  supplementaryInfoJSON: text("supplementary_info_json"), // stringified JSON
-  trendForecastJSON: text("trend_forecast_json"), // stringified JSON
-  cloudAmount: text("cloud_amount"),
-  cloudType: text("cloud_type"),
-  cloudHeight: text("cloud_height"),
-  temperature: text("temperature"),
-  dewPoint: text("dew_point"),
-  pressureQnh: text("pressure_qnh"),
-  pressureQff: text("pressure_qff"),
-  observerName: text("observer_name"),
-  remarks: text("remarks"),
-  createdAt: timestamp("created_at").defaultNow().notNull()
-});
-
-// Relations
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
-  weatherReports: many(weatherReports),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -119,13 +93,6 @@ export const sessionRelations = relations(session, ({ one }) => ({
 export const accountRelations = relations(account, ({ one }) => ({
   user: one(user, {
     fields: [account.userId],
-    references: [user.id],
-  }),
-}));
-
-export const weatherReportsRelations = relations(weatherReports, ({ one }) => ({
-  user: one(user, {
-    fields: [weatherReports.userId],
     references: [user.id],
   }),
 }));
